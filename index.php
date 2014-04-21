@@ -45,6 +45,7 @@ if (!empty($_POST)) {
                         "gameid" => $gameid,
                         "password" => $password,
                         "gamename" => isset($_POST["gamename"]) ? $_POST["gamename"] : "",
+                        "nextPlayerId" => 0,
                         "dataByPlayerId" => array()
                     );
                     file_put_contents($filename, json_encode($gameData));
@@ -60,10 +61,13 @@ if (!empty($_POST)) {
                 if ($datacontent == "gamedata") {
                     // just update the game data
                     // (never update gameid or password)
-                    if (isset($_POST["gamename"])) {
+                    if (isset($_POST["gamename"]))
                         $gameData["gamename"] = $_POST["gamename"];
-                        $returnedData["success"] = "The game name for game with id '$gameid' has been successfully updated.";
-                    }
+                    
+                    if (isset($_POST["emptyPlayersData"]) && $_POST["emptyPlayersData"] == true)
+                        $gameData["dataByPlayerId"] = array();
+
+                    $returnedData["success"] = "The game name for game with id '$gameid' has been successfully updated.";
                 }
                 else { // datacontent == playerdata
                     $playerid = isset($_POST["playerid"]) ? $_POST["playerid"] : "";
@@ -79,6 +83,7 @@ if (!empty($_POST)) {
                         }
 
                         $score = isset($_POST["score"]) ? $_POST["score"] : null;
+                        if (trim($score) == "") $score = null;
                         $gameData["dataByPlayerId"][$playerid]["score"] = $score;
 
                         isset($_POST["playername"]) ? $gameData["dataByPlayerId"][$playerid]["name"] = $_POST["playername"] : null;
@@ -104,3 +109,69 @@ if (!empty($_POST)) {
     echo json_encode($returnedData);
     return;
 } // end of POST
+
+else { // GET
+    $queryString = trim( $_SERVER["QUERY_STRING"], "/" ); // GET part, after index.php?
+    if ($queryString != "") {
+        // url type : [gameid]/[password]/datacontent
+        // or just "[gameid]" > show score table
+        $chunks = explode("/", $queryString);
+        
+        $gameid = "";
+        if (isset($chunks[0]))
+            $gameid = $chunks[0];
+
+        $password = "";
+        if (isset($chunks[1]))
+            $password = $chunks[1];
+        
+        $dataContent = "";
+        if (isset($chunks[2]))
+            $dataContent = strtolower($chunks[2]);
+        // dataContents are : gamedata / playerdata / nextplayerid
+
+        isset($chunks[3]) ? $playerId = $chunks[3] : $playerId = "";
+
+        $returnedData = array();
+        
+        if ($password == "" && $dataContent == "") {
+            // display scores table 
+        }
+        elseif ($password !== null && $dataContent != "") {
+
+            $fileName = $gameid."_".$password.".json";
+            $gameData = GetFileContent($fileName);
+
+            if ($gameData !== null) {
+                if ($dataContent == "nextplayerid") {
+                    $returnedData['nextPlayerId'] = ++$gameData["nextPlayerId"];
+
+                    file_put_contents($fileName, json_encode($gameData)); // save next player id
+                }
+                elseif ($dataContent == "gamedata") {
+                    $returnedData = $gameData;
+                }
+                elseif ($dataContent == "playerdata") {
+                    if ($playerId == "" || !isset($gameData["dataByPlayerId"][$playerId])) {
+                        $returnedData["error"] = "Wrong player id '$playerId' or player id not found for game with id '$gameid'.";
+                    }
+                    else {
+                        $returnedData = $gameData["dataByPlayerId"][$playerId];
+                    }
+                }
+                else {
+                    $returnedData["error"] = "Wrong data content '$dataContent' for game with id '$gameid'. Data content must be 'gamedata', 'playerdata' or 'nextplayerid'.";
+                }
+            }
+            else
+                $returnedData["error"] = "File not found. Wrong gameid or password with datacontent '$dataContent'.";
+        }
+
+        echo json_encode($returnedData);
+        return;
+    }
+    else { // index
+        // display explanations
+        echo 'Explanations';
+    }
+}

@@ -1,11 +1,11 @@
 <html>
     <head>
-        <title><?php echo $gameData["gamename"] ?> LeaderBoard</title>
-
+        <title><?php echo $gameData["gameName"] ?> LeaderBoard</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
 
     <body>
-        <h1> <?php echo $gameData["gamename"] ?> LeaderBoard </h1>
+        <h1> <?php echo $gameData["gameName"] ?> LeaderBoard </h1>
 
         <table>
             <tr>

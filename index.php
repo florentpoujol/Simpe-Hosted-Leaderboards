@@ -126,19 +126,18 @@ if (!empty($_POST)) {
 
 elseif (!empty($_GET)) { // GET
     $returnedData = array();
+    
 
     $action = "";
     if (isset($_GET["action"]))
         $action = strtolower($_GET["action"]);
-    $actions = array("getgamedata", "getplayerdata", "getnextplayerid", "create", "viewscores");
+    $actions = array("getgamedata", "getplayerdata", "getnextplayerid", "create", "viewscores", "");
 
     $gameId = "";
     if (isset($_GET["gameId"]))
         $gameId = $_GET["gameId"];
 
     if (in_array($action, $actions)) {
-        
-
         $password = "";
         if (isset($_GET["password"]))
             $password = $_GET["password"];
@@ -184,7 +183,7 @@ elseif (!empty($_GET)) { // GET
                     $returnedData["error"] = "A file with the game id '$gameId' already exists.";
                 }
             }
-            elseif ($action == "viewscores") {
+            elseif ($action == "viewscores" || $action == "") {
                 // find the file with the provided gameId
                 $files = scandir(".");
                 $fileName = "";
@@ -201,7 +200,7 @@ elseif (!empty($_GET)) { // GET
                     $gameData = GetFileContent($fileName);
                     $playerDataByScore = GetPlayerDataByScore($gameData);
                     
-                    include "table_template.php";
+                    include "score_table.php";
                     return;
                 }
                 else {
@@ -245,4 +244,7 @@ elseif (!empty($_GET)) { // GET
 
     echo json_encode($returnedData);
     return;
+}
+else { 
+    include "about.php";
 }

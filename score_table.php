@@ -5,7 +5,7 @@
     </head>
 
     <body>
-        <h1> <?php echo $gameData["gameName"] ?> LeaderBoard </h1>
+        <h1> <?php echo $gameData["gameName"] ?> Leaderboard </h1>
 
         <table>
             <tr>

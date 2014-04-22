@@ -5,7 +5,7 @@ Leaderboard = {
     url = nil,
 }
 
---- Check the Leaderboard parameters
+--- Check the Leaderboard parameters.
 -- @return (boolean) False if some parameter is not set, True otherwise.
 function Leaderboard.Check()
     local msg = ""
@@ -26,7 +26,7 @@ function Leaderboard.Check()
 end
 
 --- Send the query to the leaderboard via the CS.Web API.
--- @prama funcName (string) "Post" or "Get"
+-- @prama funcName (string) "Post" or "Get".
 -- @param data (table) [optional] The data to transmit.
 -- @param callback (function) [optional] The callback function to call when the request is completed. The callback is passed with two arguments : the returned data and an eventual error message (only one of the argument is set at the same time).
 function Leaderboard.Query( funcName, data, callback )
@@ -99,7 +99,8 @@ function Leaderboard.UpdateGameData( data, callback )
 end
 
 --- Update one player data.
--- Set the "name" or "score" keys to update the player's name or score.
+-- Set the "id", "name" or "score" keys to update the player's id, name (default's to "Player [playerId]") or score.
+-- The player id can be any string. You can get a unique numerical id with Leaderboard.GetNextPlayerId().
 -- @param playerId (string or number) The id of the player.
 -- @param data (table) [optional] The data to transmit.
 -- @param callback (function) [optional] The callback function to call when the request is completed. The callback is passed with two arguments : the returned data and an eventual error message (only one of the argument is set at the same time).

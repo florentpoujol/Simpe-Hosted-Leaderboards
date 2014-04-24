@@ -1,4 +1,13 @@
 <?php
+/*
+CraftStudio Leaderboard
+
+A simple leaderboard system in PHP that can work ("host") with multiple games.
+<https://github.com/florentpoujol/CraftStudio-Leaderboard>
+
+Copyright © 2014 Florent POUJOL, published under the WTFPL license.
+<florentpoujol.fr>
+*/
 
 function GetFileContent( $fileName ) {
     $files = scandir("."); // curent dir
@@ -27,12 +36,13 @@ function GetPlayerDataByScore( $gameData ) {
 
 
 if (!empty($_POST)) {
-
+    $returnedData = array();
+    
     $action = isset($_POST["action"]) ? $_POST["action"] : "";
 
     if ($action == "updategamedata" || $action == "updateplayerdata") {
 
-        $gameId = isset($_POST["gameId"]) ? $_POST["gameId"] : "";
+        $gameId = isset($_POST["gameId"]) ? str_replace("_", " ", $_POST["gameId"]) : "";
         $password = isset($_POST["password"]) ? $_POST["password"] : "";
         $fileName = $gameId."_".$password.".json";
 
@@ -123,11 +133,9 @@ if (!empty($_POST)) {
     return;
 } // end of POST
 
-
-elseif (!empty($_GET)) { // GET
+elseif (!empty($_GET)) {
     $returnedData = array();
     
-
     $action = "";
     if (isset($_GET["action"]))
         $action = strtolower($_GET["action"]);

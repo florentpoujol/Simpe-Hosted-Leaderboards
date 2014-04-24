@@ -7,6 +7,8 @@
     <body>
         <h1> <?php echo $gameData["gameName"] ?> Leaderboard </h1>
 
+        <p>Total players : <?php echo count($gameData["dataByPlayerId"]); ?></p>
+
         <table>
             <tr>
                 <th>Name</th>

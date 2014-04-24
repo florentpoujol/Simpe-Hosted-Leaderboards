@@ -1,5 +1,5 @@
 # Leaderboard for CraftStudio games
 
-paragraph
+A simple leaderboard system in PHP that can work ("host") with multiple games (and not just [CraftStudio](http://craftstud.io) games.
 
-- puce1
+[Check out the readme over at the GitHub repo](https://github.com/florentpoujol/CraftStudio-Leaderboard) to learn more how to use it)

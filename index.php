@@ -244,7 +244,18 @@ elseif (!empty($_GET)) { // GET
 
     echo json_encode($returnedData);
     return;
-}
+} // end of GET
+
 else { 
+    // get the list of games
+    $gameDataByGameId = array();
+    $files = scandir(".");
+    foreach ($files as $_fileName) {
+        $matches = array();
+        if (preg_match("#^([^_]+)_.+\.json$#i", $_fileName, $matches)) {
+            $gameDataByGameId[$matches[1]] = json_decode(file_get_contents($matches[0]), true);
+        }
+    }
+
     include "about.php";
 }

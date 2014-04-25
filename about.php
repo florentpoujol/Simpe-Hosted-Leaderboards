@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>Leaderboard for CraftStudio games</title>
+        <title>Simple leaderboard hosting</title>
     </head>
     <body>
         <?php

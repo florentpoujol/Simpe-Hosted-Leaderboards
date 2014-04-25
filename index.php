@@ -9,16 +9,18 @@ Copyright © 2014 Florent POUJOL, published under the WTFPL license.
 <florentpoujol.fr>
 */
 
+$filesDirectory = "files/";
+
 function GetFileContent( $fileName ) {
-    $files = scandir("."); // curent dir
+    $files = scandir("files/"); // curent dir
     if (in_array($fileName, $files))
-        return json_decode( file_get_contents($fileName), true );
+        return json_decode( file_get_contents("files/".$fileName), true );
     else
         return null;
 }
 
 function GetPlayerDataByScore( $gameData ) {
-    $playerDataByScore = array();
+    $playerDataByScore = array();  
     foreach ($gameData["dataByPlayerId"] as $playerId => $data) {
         if (isset($data["score"])) {
             if (!isset($data["playerName"])) $data["playerName"] = "Player $playerId";
@@ -32,6 +34,14 @@ function GetPlayerDataByScore( $gameData ) {
     }
     krsort($playerDataByScore);
     return $playerDataByScore;
+}
+
+function CheckCharacters( $word ) {
+    $word = str_replace("/", "", $word);
+    $word = str_replace("\\", "", $word);
+    $word = str_replace(" ", "", $word);
+    $word = str_replace("_", "", $word);
+    return trim($word);
 }
 
 
@@ -49,42 +59,7 @@ if (!empty($_POST)) {
         if ($gameId != "" && $password != "") {
             $gameData = GetFileContent($fileName);
             
-            if ($gameData === null) {
-                // no file found, because no file exists yet, or bad password
-             
-                // check if a file with the specified gameId already exists
-                $gameIdExists = false;
-                $files = scandir(".");
-                foreach ($files as $_fileName) {
-                    if (preg_match("#^".$gameId."_.+\.json$#i", $_fileName)) {
-                        $gameIdExists = true;
-                        break;
-                    }
-                }
-
-                // game id found but wrong password
-                if ($gameIdExists) {
-                    $returnedData["error"] = "Wrong password for game with id '$gameId'.";
-                }
-                elseif ($action == "gamedata") {
-                    // no file found, create one
-                    $gameData = array(
-                        "gameId" => $gameId,
-                        "password" => $password,
-                        "gameName" => isset($_POST["gameName"]) ? $_POST["gameName"] : "".$gameId,
-                        "nextPlayerId" => 0,
-                        "dataByPlayerId" => array()
-                    );
-                    file_put_contents($fileName, json_encode($gameData));
-
-                    $returnedData["success"] = "File for game with id '$gameId' has been successfully created.";
-                }
-                else {
-                    // action is 'playerdata' but no file is found
-                    $returnedData["error"] = "File not found for game with id '$gameId'. Create it first.";
-                }
-            }
-            else { // file exists, good gameId and password
+            if ($gameData !== null) { // file exists, good gameId and password
                 if ($action == "updategamedata") {
                     // just update the game data
                     // (never update gameId or password)
@@ -106,19 +81,22 @@ if (!empty($_POST)) {
                             $gameData["dataByPlayerId"][$playerId] = array("name" => "Player $playerId");
                         }
 
-                        $score = isset($_POST["score"]) ? $_POST["score"] : null;
-                        if (trim($score) == "") $score = null;
-                        $gameData["dataByPlayerId"][$playerId]["score"] = $score;
+                        if (isset($_POST["score"])) 
+                            $gameData["dataByPlayerId"][$playerId]["score"] = $score;
 
-                        isset($_POST["playerName"]) ? $gameData["dataByPlayerId"][$playerId]["name"] = $_POST["playerName"] : null;
+                        if (isset($_POST["name"]))
+                            $gameData["dataByPlayerId"][$playerId]["name"] = $_POST["name"];
 
                         $returnedData["success"] = "The player with id '$playerId' for game with id '$gameId' has been successfully updated.";
                     }
                 }
 
                 if (!isset($returnedData["error"])) {
-                    file_put_contents($fileName, json_encode($gameData));
+                    file_put_contents($filesDirectory.$fileName, json_encode($gameData));
                 }
+            }
+            else {
+                $returnedData["error"] = "File not found for game with id '$gameId'. Create it first.";
             }
         }
         else {
@@ -143,25 +121,25 @@ elseif (!empty($_GET)) {
 
     $gameId = "";
     if (isset($_GET["gameId"]))
-        $gameId = $_GET["gameId"];
-
+        $gameId = CheckCharacters( $_GET["gameId"] );
+                        
     if (in_array($action, $actions)) {
         $password = "";
         if (isset($_GET["password"]))
-            $password = $_GET["password"];
-        
+            $password = CheckCharacters( $_GET["password"] );
+
         $fileName = $gameId."_".$password.".json";
         $gameData = GetFileContent($fileName);
         
         if ($gameId != "") {
-            if ($action == "create") {
+            if ($action == "create" && $password != "") {
                 // check if file does not exists yet
 
                 if ($gameData === null) {
                     // file is not found but
                     // check if a file with the specified gameId already exists
                     $gameIdExists = false;
-                    $files = scandir(".");
+                    $files = scandir($filesDirectory);
                     foreach ($files as $_fileName) {
                         if (preg_match("#^".$gameId."_.+\.json$#i", $_fileName)) {
                             $gameIdExists = true;
@@ -178,12 +156,12 @@ elseif (!empty($_GET)) {
                         $gameData = array(
                             "gameId" => $gameId,
                             "password" => $password,
-                            "gameName" => isset($_GET["gameName"]) ? $_GET["gameName"] : "".$gameId,
+                            "gameName" => isset($_GET["gameName"]) && trim($_GET["gameName"]) != "" ? $_GET["gameName"] : "".$gameId,
                             "nextPlayerId" => 0,
                             "dataByPlayerId" => array()
                         );
-                        file_put_contents($fileName, json_encode($gameData));
-
+                        file_put_contents($filesDirectory.$fileName, json_encode($gameData));
+                        
                         $returnedData["success"] = "File for game with id '$gameId' has been successfully created.";
                     }
                 }
@@ -193,7 +171,7 @@ elseif (!empty($_GET)) {
             }
             elseif ($action == "viewscores" || $action == "") {
                 // find the file with the provided gameId
-                $files = scandir(".");
+                $files = scandir($filesDirectory);
                 $fileName = "";
                 foreach ($files as $_fileName) {
                     $matches = array();
@@ -204,8 +182,8 @@ elseif (!empty($_GET)) {
                     }
                 }
 
-                if ($fileName != "") {
-                    $gameData = GetFileContent($fileName);
+                $gameData = GetFileContent($fileName);
+                if ($gameData !== null) {
                     $playerDataByScore = GetPlayerDataByScore($gameData);
                     
                     include "score_table.php";
@@ -219,7 +197,7 @@ elseif (!empty($_GET)) {
             elseif ($gameData !== null) {
                 if ($action == "getnextplayerid") {
                     $returnedData['nextPlayerId'] = ++$gameData["nextPlayerId"];
-                    file_put_contents($fileName, json_encode($gameData)); // save next player id
+                    file_put_contents($filesDirectory.$fileName, json_encode($gameData)); // save next player id
                 }
                 elseif ($action == "getgamedata") {
                     $gameData["playerDataByScore"] = GetPlayerDataByScore($gameData);
@@ -257,11 +235,11 @@ elseif (!empty($_GET)) {
 else { 
     // get the list of games
     $gameDataByGameId = array();
-    $files = scandir(".");
+    $files = scandir($filesDirectory);
     foreach ($files as $_fileName) {
         $matches = array();
         if (preg_match("#^([^_]+)_.+\.json$#i", $_fileName, $matches)) {
-            $gameDataByGameId[$matches[1]] = json_decode(file_get_contents($matches[0]), true);
+            $gameDataByGameId[$matches[1]] = json_decode(file_get_contents($filesDirectory.$matches[0]), true);
         }
     }
 

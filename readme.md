@@ -1,8 +1,8 @@
-# CraftStudio Leaderboard
+# Simple leaderboard hosting
 
-A simple leaderboard system in PHP that can work ("host") with multiple games (and not just CraftStudio games).
+A simple leaderboard system in PHP that can host leaderboards for multiple games (and not just CraftStudio games).
 
-This repo also provide a Lua wrapper to easily work with the leaderboard from [CraftStudio](http://craftstud.io) games.
+A Lua wrapper is provided to easily work with the leaderboard from [CraftStudio](http://craftstud.io) games.
 
 Released under the [WTFPL](http://www.wtfpl.net) licence.
 
@@ -21,7 +21,7 @@ When a GET request is successfull, a JSON object is returned with the requested 
 
 ### Creating a game file
 
-A game is caracterized by a game id and a password which both can be any string (can't contain an underscore, though).
+A leaderboard is caracterized by a game id and a password which both can be any string (can't contain an underscore, though).
 Send a GET request with the following parameters to create your game's file :
 
 - gameId=[id]
@@ -30,7 +30,7 @@ Send a GET request with the following parameters to create your game's file :
 
 You can just type this in any browser's navigatio bar : `[Leaderboard URL]/index.php?gameId=[id]&password=[password]&action=create`
 
-The game's file has this structure (JSON)
+The game's file has this structure (JSON) :
 
     {
         "gameId": "[id]",

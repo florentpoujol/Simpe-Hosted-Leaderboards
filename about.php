@@ -15,7 +15,7 @@
         </p>
 
         <?php if (count($gameDataByGameId) <= 0): ?>
-            <p>No games yet.</p>
+            <p><em>No games yet.</em></p>
         <?php else: ?>
 
         <ul>

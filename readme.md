@@ -1,4 +1,4 @@
-# Simple leaderboard hosting
+# Simple hosted leaderboards
 
 A simple leaderboard system in PHP that can host leaderboards for multiple games (and not just CraftStudio games).
 

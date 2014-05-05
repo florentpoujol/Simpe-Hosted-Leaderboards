@@ -80,7 +80,7 @@ if (!empty($_POST)) {
                         }
 
                         if (isset($_POST["score"])) 
-                            $gameData["dataByPlayerId"][$playerId]["score"] = $score;
+                            $gameData["dataByPlayerId"][$playerId]["score"] = $_POST["score"];
 
                         if (isset($_POST["name"]))
                             $gameData["dataByPlayerId"][$playerId]["name"] = $_POST["name"];

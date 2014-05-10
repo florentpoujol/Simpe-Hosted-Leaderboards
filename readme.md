@@ -1,13 +1,13 @@
 # Simple hosted leaderboards
 
-A simple leaderboard system in PHP that can host leaderboards for multiple games (and not just CraftStudio games).
+A simple leaderboard system in PHP that can host leaderboards for multiple games.
 
-A Lua wrapper is provided to easily work with the leaderboard from [CraftStudio](http://craftstud.io) games.
+An SDK is provided to easily work with the leaderboard from [CraftStudio](http://craftstud.io) games.
 
 Released under the [WTFPL](http://www.wtfpl.net) licence.
 
 - [Usage](#usage)
-- [Lua wrapper for CraftStudio](#lua-wrapper-for-craftstudio)
+- [CraftStudio SDK](#craftstudio-sdk)
 
 <a name="usage"></a>
 ## Usage
@@ -16,21 +16,21 @@ You interact with the script via POST/GET request.
 
 When the request result in any error, a JSON object is returned with the error message as value of the `error` key.  
 When a POST request is successful, a JSON object is returned with the success message as value of the `success` key.  
-When a GET request is successfull, a JSON object is returned with the requested data.  
+When a GET request is successful, a JSON object is returned with the requested data.  
 
 
 ### Creating a game file
 
-A leaderboard is caracterized by a game id and a password which both can be any string (can't contain an underscore, though).
+A leaderboard is characterized by a game id and a password which both can contain any alpha numeric character as a string.
 Send a GET request with the following parameters to create your game's file :
 
 - gameId=[id]
 - password=[password]
 - action=create
 
-You can just type this in any browser's navigatio bar : `[Leaderboard URL]/index.php?gameId=[id]&password=[password]&action=create`
+You can just type this in any browser's navigation bar : `[Leaderboard URL]/index.php?gameId=[id]&password=[password]&action=create`
 
-The game's file has this structure (JSON) :
+Each game's leaderboard data is saved in a JSON file with this structure :
 
     {
         "gameId": "[id]",
@@ -59,7 +59,7 @@ Send a POST request with the following parameters to update the game's name and/
 - gameName=[name]
 - emptyPlayersData=true
 
-Each player has its own unique id. As the game id, the player id can be any string.  
+Each player has its own unique id which can be any string (with any characters).  
 Send a POST request with the following parameters to set/update one player's data :
 
 - gameId=[id]
@@ -72,8 +72,8 @@ Send a POST request with the following parameters to set/update one player's dat
 
 ### Getting data
 
-If you lack imagination for your player's id, you can get a numerical id, incrementing every time.  
-Send a GET request with the following parameters returns a JSON object with the id as the value of the `nextPlayerId` key.
+If you lack imagination for your player's id, you can get a numerical id, incremented each time.  
+A GET request with the following parameters returns a JSON object with the id as the value of the `nextPlayerId` key.
 
 - gameId=[id]
 - password=[password]
@@ -107,9 +107,11 @@ Send a GET request with the following parameters to get one player data :
 - action=getplayerdata
 - playerId=[player id]
 
+It returns a JSON object containing the "name" and "score" keys (Note that the score is saved as a string).
 
-<a name="lua-wrapper-for-craftstudio"></a>
-## Lua wrapper for CraftStudio
+
+<a name="craftstudio-sdk"></a>
+## CraftStudio SDK
 
 To make things super easy in [CraftStudio](http://craftstud.io), you can use the `Leaderboard` object :
 
@@ -119,13 +121,15 @@ To make things super easy in [CraftStudio](http://craftstud.io), you can use the
 - `Leaderboard.GetNextPlayerId( callback )`
 - `Leaderboard.GetPlayerData( playerId, callback )`
 
+The callbacks are passed with two arguments : the returned data (table) and an eventual error message (string). Only one of the argument is set at the same time.
+
 How to install :
 
-- Copy and paste the [Leaderboard.lua script](https://raw.githubusercontent.com/florentpoujol/CraftStudio-Leaderboard/master/Lua/Leaderboard.lua) in CraftStudio (you can also [find it as part of my Toolbox](http://florentpoujol.fr/craftstudio/toolbox)).
--  then set the `Leaderboard.gameId` and `Leaderboard.password` properties.
+- Copy and paste the [CraftStudio/Leaderboard.lua](https://raw.githubusercontent.com/florentpoujol/Simpe-Hosted-Leaderboards/master/CraftStudio/Leaderboard.lua) script in CraftStudio (you can also [find it as part of my Toolbox](http://florentpoujol.fr/craftstudio/toolbox)).
+- Then set the `Leaderboard.gameId`, `Leaderboard.password` and  `Leaderboard.url` properties.
 
-If you host the leaderboard yourself (I host one at [http://csleaderboard.florentpoujol.fr](http://csleaderboard.florentpoujol.fr)), change the `Leaderboard.url` properties.
- 
+If you don't want to host the leaderboard script yourself, you can use the one I host at [http://csleaderboard.florentpoujol.fr](http://csleaderboard.florentpoujol.fr).
+
 
 ### Function reference
 
@@ -162,7 +166,7 @@ If you host the leaderboard yourself (I host one at [http://csleaderboard.floren
         
 <dt><a name="Leaderboard.GetGameData"></a><h3>Leaderboard.GetGameData( callback )</h3></dt>
 <dd>
-Get the full game data. Player data will be sorted by score in the "playerDataByScore" table in the returned data.
+Get the full game data. Player data will be stored by score descending (big values first) in the "playerDataSortedByScoreDesc" table in the returned data.
 <br><br>
 
     <strong>Parameters:</strong>

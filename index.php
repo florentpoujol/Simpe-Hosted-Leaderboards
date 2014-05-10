@@ -1,9 +1,9 @@
 <?php
 /*
-CraftStudio Leaderboard
+Simple Hosted Leaderboards
 
 A simple leaderboard system in PHP that can work ("host") with multiple games.
-<https://github.com/florentpoujol/CraftStudio-Leaderboard>
+<https://github.com/florentpoujol/Simple-Hosted-Leaderboards>
 
 Copyright © 2014 Florent POUJOL, published under the WTFPL license.
 <florentpoujol.fr>
@@ -237,7 +237,7 @@ elseif (!empty($_GET)) {
     return;
 } // end of GET
 
-else { 
+else {
     // get the list of games
     $gameDataByGameId = array();
     $files = scandir($filesDirectory);

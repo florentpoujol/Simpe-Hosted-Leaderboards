@@ -1,7 +1,7 @@
 -- Leaderboard.lua
 --
--- Wrapper for CraftStudio to work with the "CraftStudio Leaderboard" PHP script.
--- <https://github.com/florentpoujol/CraftStudio-Leaderboard>
+-- CraftStudio SDK to work with the "Simple Hosted Leaderboards" PHP script.
+-- <https://github.com/florentpoujol/Simple-Hosted-Leaderboards>
 -- 
 -- Copyright © 2014 Florent POUJOL, published under the WTFPL license.
 -- <florentpoujol.fr>
@@ -10,7 +10,7 @@
 Leaderboard = {
     gameId = nil,
     password = nil,
-    url = "http://csleaderboard.florentpoujol.fr/index.php",
+    url = nil,
 }
 
 
@@ -94,13 +94,57 @@ function Leaderboard.UpdatePlayerData( playerId, data, callback )
     Leaderboard.Query( "Post", data, callback )
 end
 
-
+-- Sort a list of table using one of the tables property as criteria.
+-- @param t (table) The table.
+-- @param property (string) The property used as criteria to sort the table.
+-- @param orderBy (string) [default="asc"] How the sort should be made. Can be "asc" or "desc". Asc means small values first.
+-- @return (table) The ordered table.
+local function table_sortby( t, property, orderBy )
+    if orderBy == nil or not (orderBy == "asc" or orderBy == "desc") then
+        orderBy = "asc"
+    end
+    
+    local propertyValues = {}
+    local itemsByPropertyValue = {}
+    for i=1, #t do
+        local propertyValue = t[i][property]
+        if itemsByPropertyValue[propertyValue] == nil then
+            table.insert(propertyValues, propertyValue)    
+            itemsByPropertyValue[propertyValue] = {}
+        end
+        table.insert(itemsByPropertyValue[propertyValue], t[i])
+    end
+    
+    if orderBy == "desc" then
+        table.sort(propertyValues, function(a,b) return a>b end)
+    else
+        table.sort(propertyValues)
+    end
+    
+    t = {}
+    for i=1, #propertyValues do
+        for j, _table in pairs(itemsByPropertyValue[propertyValues[i]]) do
+            table.insert(t, _table)
+        end
+    end
+    return t
+end
 
 --- Get the full game data.
--- Player data will be stored by score in the "playerDataByScore" table in the returned data.
+-- Player data will be stored by score descending (big values first) in the "playerDataSortedByScoreDesc" table in the returned data.
 -- @param callback (function) [optional] The callback function to call when the request is completed. The callback is passed with two arguments : the returned data and an eventual error message (only one of the argument is set at the same time).
 function Leaderboard.GetGameData( callback )
-    Leaderboard.Query( "Get", { action = "getgamedata" }, callback )
+    Leaderboard.Query( "Get", { action = "getgamedata" }, function( data, e )
+        if data and data.dataByPlayerId then
+            local playersData = {}
+            for id, playerData in pairs(data.dataByPlayerId) do
+                playerData.score = tonumber(playerData.score)
+                table.insert(playersData, playerData)
+            end
+            data.playerDataSortedByScoreDesc = table_sortby(playersData, "score", "desc") -- desc = big values first
+        end
+        callback( data, e )
+    end )
 end
 
 --- Get a single player data.
